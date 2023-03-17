@@ -57,6 +57,11 @@ input[type="text"] {
   border-radius: 4px;
 }
 
+.task span{
+
+    width: 100%;
+}
+
 .button-container {
   display: flex;
   align-items: flex-end;

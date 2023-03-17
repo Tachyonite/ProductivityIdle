@@ -64,7 +64,7 @@ input[type="text"] {
 }    
 
 .complete-button {
-    background-color: #4caf50;
+    background-color: #ffe324;
     color: white;
     padding: 0.3rem 0.8rem;
     border: none;
@@ -92,7 +92,7 @@ input[type="text"] {
 }
 
 .delete-button, .pin-button {
-  background-color: transparent;
+  background-color: #DDD;
   color: #888;
   padding: 0.3rem 0.8rem;
   border: none;
@@ -121,4 +121,20 @@ input[type="text"] {
   background-color: #f0f0f0;
   border: 2px solid #2196f3;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#taskiumSpan {
+
+    color:  blue;
+}
+
+.taskium-button {
+  background-color: transparent;
+  color: #888;
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 1rem;
+  font-weight: bold;
 }

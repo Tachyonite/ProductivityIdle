@@ -1,4 +1,5 @@
 const taskCounter = document.getElementById("taskCounter");
+const taskiumCounter = document.getElementById("taskiumCounter");
 const addTaskButton = document.getElementById("addTaskButton");
 const newTaskInput = document.getElementById("newTask");
 const taskList = document.getElementById("taskList");
@@ -9,10 +10,63 @@ const importDataButton = document.getElementById("importDataButton");
 
 
 let count = 0;
+let taskiumCount  = 0;
+
+
+function animateTaskiumIncrement(currentValue, targetValue, duration) {
+  const startTime = performance.now();
+  const difference = targetValue - currentValue;
+
+  function updateTaskiumValue(currentTime) {
+    const elapsedTime = currentTime - startTime;
+    const progress = Math.min(elapsedTime / duration, 1);
+
+    const newValue = currentValue + difference * progress;
+    taskiumCounter.textContent = Math.round(newValue);
+
+    if (progress < 1) {
+      requestAnimationFrame(updateTaskiumValue);
+    } else {
+      taskiumCount = targetValue;
+      saveTasks();
+    }
+  }
+
+  requestAnimationFrame(updateTaskiumValue);
+}
 
 function createTask(text, pinned = false) {
   const taskItem = document.createElement("div");
   taskItem.classList.add("task");
+
+  const taskiumButton = document.createElement("button");
+  taskiumButton.textContent = "1";
+  taskiumButton.classList.add("taskium-button");
+  taskItem.appendChild(taskiumButton);
+
+  taskiumButton.addEventListener("click", () => {
+  const currentValue = parseInt(taskiumButton.textContent, 10);
+  let newValue;
+
+  switch (currentValue) {
+    case 1:
+      newValue = 2;
+      break;
+    case 2:
+      newValue = 5;
+      break;
+    case 5:
+      newValue = 10;
+      break;
+    case 10:
+    default:
+      newValue = 1;
+      break;
+  }
+
+  taskiumButton.textContent = newValue.toString();
+  saveTasks();
+});
 
   const taskText = document.createElement("span");
   taskText.textContent = text;
@@ -24,10 +78,18 @@ function createTask(text, pinned = false) {
   buttonContainer.classList.add("button-container");
   taskItem.appendChild(buttonContainer);
 
+
+
   const completeButton = document.createElement("button");
-  completeButton.textContent = "Complete";
+  completeButton.textContent = "✔️";
   completeButton.classList.add("complete-button");
   buttonContainer.appendChild(completeButton);  
+
+   const pinButton = document.createElement("button");
+  pinButton.textContent = pinned ? "📌" : "📌";
+  pinButton.classList.add("pin-button");
+  buttonContainer.appendChild(pinButton);
+
 
   const deleteButton = document.createElement("button");
   deleteButton.textContent = "❌";
@@ -43,6 +105,9 @@ function createTask(text, pinned = false) {
     taskItem.classList.add("completed");
     setTimeout(() => {
       count++;
+      const taskiumValue = parseInt(taskiumButton.textContent, 10);
+        const newTaskiumCount = taskiumCount + taskiumValue;
+        animateTaskiumIncrement(taskiumCount, newTaskiumCount, 1000);
       if (!taskItem.classList.contains("pinned")) {
         taskList.removeChild(taskItem);
         }
@@ -54,10 +119,6 @@ function createTask(text, pinned = false) {
     }, 200);
   });
 
-   const pinButton = document.createElement("button");
-  pinButton.textContent = pinned ? "📌" : "📌";
-  pinButton.classList.add("pin-button");
-  buttonContainer.appendChild(pinButton);
 
   if (pinned) {
     taskItem.classList.add("pinned");
@@ -130,7 +191,11 @@ newTaskInput.addEventListener("keydown", (event) => {
 function loadTasks() {
   const storedTasks = localStorage.getItem("tasks");
   const storedCount = localStorage.getItem("count");
-
+  const storedTaskiumCount = localStorage.getItem("taskiumCount");
+  if (storedTaskiumCount) {
+    taskiumCount = parseInt(storedTaskiumCount, 10);
+    taskiumCounter.textContent = taskiumCount;
+  }
   if (storedTasks) {
     const tasks = JSON.parse(storedTasks);
     tasks.forEach((task) => {
@@ -152,6 +217,7 @@ function saveTasks() {
   }));
   localStorage.setItem("tasks", JSON.stringify(tasks));
   localStorage.setItem("count", count.toString());
+  localStorage.setItem("taskiumCount", taskiumCount.toString());
 }
 
 addTaskButton.addEventListener("click", () => {
@@ -185,6 +251,7 @@ function exportData() {
 
   const data = {
     count,
+    taskiumCount,
     tasks,
   };
 
@@ -199,9 +266,16 @@ function importData() {
     try {
       const data = JSON.parse(dataString);
 
-      if (data.count !== undefined && Array.isArray(data.tasks)) {
+      if (
+        data.count !== undefined &&
+        data.taskiumCount !== undefined &&
+        Array.isArray(data.tasks)
+      ) {
         count = data.count;
         taskCounter.textContent = count;
+
+        taskiumCount = data.taskiumCount;
+        taskiumCounter.textContent = taskiumCount;
 
         taskList.innerHTML = "";
         data.tasks.forEach((task) => {
